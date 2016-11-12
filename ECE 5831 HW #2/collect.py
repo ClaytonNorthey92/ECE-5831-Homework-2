@@ -39,11 +39,14 @@ class Face:
 		return self.parsed_content
 
 if __name__=='__main__':
-	faces = []
+	faces = {}
 	for dir_i in range(1, 41):
+		faces_tmp = []
 		for file_i in range(1, 11):
 			f = open('{}/s{}/{}.pgm'.format(FACES_DIR, dir_i, file_i), 'rb')
 			file_content = f.read()
 			f.close()
 			this_face = Face(file_content)
-			faces.append(this_face)
+			faces_tmp.append(this_face)
+		faces[dir_i] = copy.copy(faces_tmp)
+	print(faces)
