@@ -5,6 +5,7 @@ import copy
 
 FACES_DIR = 'orl_faces'
 META_BYTES = 14
+DIMENSIONS = [92, 112]
 # takes in the conent of a file and returns information about the 
 # file according to PGM spec
 
@@ -16,7 +17,7 @@ class Face:
 	parsed_content = None
 
 	def __init__(self, content):
-		self.dimensions = [92, 112]
+		self.dimensions = DIMENSIONS
 		self.content = content[META_BYTES:]
 		self._set_content()
 
@@ -35,7 +36,8 @@ class Face:
 	def get_content(self):
 		return self.parsed_content
 
-# gets the average face give a list of faces
+
+# gets the average face give a list of faces (get's avg per person - 10 images) 
 def get_average_face(faces):
 	num_faces = float(len(faces))
 	face_content = [f.get_content() for f in faces]
@@ -45,6 +47,20 @@ def get_average_face(faces):
 		for c_index, column in enumerate(row):
 			avg_face[r_index][c_index] = sum(f[r_index][c_index] for f in face_content)/num_faces
 	return avg_face
+
+
+# gets avg of all 40 avg faces
+def get_avg_array(num_images): 
+	list_len = len(num_images)
+	avg_face = [[0.0]*DIMENSIONS[1]]*DIMENSIONS[0]
+	for r_index, row in enumerate(avg_face):
+		for c_index, column in enumerate(row):
+			avg_face[r_index][c_index] = sum(f[r_index][c_index] for f in num_images)/list_len
+	return avg_face
+
+
+
+
 
 if __name__=='__main__':
 	faces = {}
@@ -59,3 +75,15 @@ if __name__=='__main__':
 			faces_tmp.append(this_face)
 		faces[dir_i] = copy.copy(faces_tmp)
 		avg_faces[dir_i] = get_average_face(faces[dir_i])
+	tot_avg = get_avg_array([avg_faces[i] for i in range(1,11)])
+
+	print(len(tot_avg), len(tot_avg[0]))
+
+
+
+
+
+
+
+
+
