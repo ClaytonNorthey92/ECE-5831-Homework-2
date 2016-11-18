@@ -2,7 +2,7 @@
 # this file must be in the same directroy as the orl_faces 
 # directory extracted from the compressed files
 import copy
-
+import numpy
 FACES_DIR = 'orl_faces'
 META_BYTES = 14
 DIMENSIONS = [92, 112]
@@ -31,44 +31,43 @@ class Face:
 		while content_tmp:
 			output_matrix.append([ord(c) for c in content_tmp[:columns]])
 			content_tmp = content_tmp[columns:]
-		self.parsed_content = output_matrix
+		self.parsed_content = numpy.matrix(output_matrix)
 
 	def get_content(self):
 		return self.parsed_content
 
 
 # gets the average face give a list of faces (get's avg per person - 10 images) 
-def get_average_face(faces):
+def get_average_face(faces, use_class=True):
 	num_faces = float(len(faces))
-	face_content = [f.get_content() for f in faces]
-	dimensions = faces[0].get_dimensions()
-	avg_face = [[0.0]*dimensions[1]]*dimensions[0]
-	for r_index, row in enumerate(avg_face):
-		for c_index, column in enumerate(row):
-			avg_face[r_index][c_index] = sum(f[r_index][c_index] for f in face_content)/num_faces
+	face_content = None
+	if use_class:
+		face_content = [f.get_content() for f in faces]
+	else:
+		face_content = faces
+	avg_face = sum(face_content)/len(face_content)
 	return avg_face
-
-
-# gets avg of all 40 avg faces
-def get_avg_array(num_images): 
-	list_len = len(num_images)
-	avg_face = [[0.0]*DIMENSIONS[1]]*DIMENSIONS[0]
-	for r_index, row in enumerate(avg_face):
-		for c_index, column in enumerate(row):
-			avg_face[r_index][c_index] = sum(f[r_index][c_index] for f in num_images)/list_len
-	return avg_face
+	
 
 def get_distance_per_average(total_avg, face_avg):
-	distance_face = [[0.0]*DIMENSIONS[1]]*DIMENSIONS[0]
-	for r_index, row in enumerate(distance_face):
-		for c_index, column in enumerate(row):
-			distance_face[r_index][c_index] = face_avg[r_index][c_index] - total_avg[r_index][c_index]
-	return distance_face
+	return face_avg - total_avg
+
+
+# assumes faces is a list of matrixes
+# for every face, Fi, Cij = (Fi-u)(Fj-u)
+def get_covariance(faces, avg_face):
+	covs = [numpy.cov(face) for face in faces]
+	return sum(covs)/len(faces)
+
+def project_face():
+	#to-do
+	pass
 
 if __name__=='__main__':
 	faces = {}
-	avg_faces = {}
-	distance_faces = {}
+	avg_faces = []
+	distance_faces = []
+	all_faces = []
 	for dir_i in range(1, 41):
 		faces_tmp = []
 		for file_i in range(1, 11):
@@ -77,18 +76,13 @@ if __name__=='__main__':
 			f.close()
 			this_face = Face(file_content)
 			faces_tmp.append(this_face)
+			all_faces.append(this_face)
 		faces[dir_i] = copy.copy(faces_tmp)
-		avg_faces[dir_i] = get_average_face(faces[dir_i])
-	tot_avg = get_avg_array([avg_faces[i] for i in range(1,11)])
-	for i in range(1,41):
-		distance_faces[i] = get_distance_per_average(tot_avg, avg_faces[i])
-	print(distance_faces[1][0])
+		avg_faces.append(get_average_face(faces[dir_i]))
+	total_avg = get_average_face(avg_faces, use_class=False)
+	for face in avg_faces:
+		distance_faces.append(get_distance_per_average(total_avg, face))
+	faces_covariance = get_covariance(distance_faces, total_avg)
+	eigen_values, eigen_vectors = numpy.linalg.eig(faces_covariance)
 
-
-
-
-
-
-
-
-
+	project_face()
