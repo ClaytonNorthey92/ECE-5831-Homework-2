@@ -109,7 +109,7 @@ if __name__=='__main__':
 	# are 10 images of each person, we average these and store them
 	for dir_i in range(1, 41):
 		faces_tmp = []
-		for file_i in range(1, 11):
+		for file_i in range(1, 6):
 			f = open('{}/s{}/{}.pgm'.format(FACES_DIR, dir_i, file_i), 'rb')
 			file_content = f.read()
 			f.close()
@@ -169,15 +169,22 @@ if __name__=='__main__':
 	# number of correct results, number of incorrect results, and the percentage correct,
 	# and the runtime
 	correct = 0
+	non_recorded_correct = 0
 	incorrect = 0
+	non_recorded_incorrect = 0
 	for key in classifed:
 		expected = key/10
 		if expected == classifed[key]:
+			if expected % 10 >= 5:
+				non_recorded_correct += 1
 			correct += 1
 		else:
+			if expected % 10 >= 5:
+				non_recorded_incorrect += 1
 			incorrect += 1
 		print "Classified {} as {}, expected {}".format(key, classifed[key], expected)
 	print "{} correct, {} incorrect, which is a success rate of {}%".format(correct, incorrect, float(correct)/float(correct+incorrect) * 100)
+	print "{} of the unrecorded were correctly classified, {} of the unrecorded were incorrectly classified with a success rate of {}%".format(non_recorded_correct, non_recorded_incorrect, float(non_recorded_correct)/float(non_recorded_correct + non_recorded_incorrect) * 100)
 	diff_time = datetime.datetime.now() - start
 	print "runtime {}".format(diff_time)
 
