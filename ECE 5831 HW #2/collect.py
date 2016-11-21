@@ -184,7 +184,8 @@ if __name__=='__main__':
 			incorrect += 1
 		print "Classified {} as {}, expected {}".format(key, classifed[key], expected)
 	print "{} correct, {} incorrect, which is a success rate of {}%".format(correct, incorrect, float(correct)/float(correct+incorrect) * 100)
-	print "{} of the unrecorded were correctly classified, {} of the unrecorded were incorrectly classified with a success rate of {}%".format(non_recorded_correct, non_recorded_incorrect, float(non_recorded_correct)/float(non_recorded_correct + non_recorded_incorrect) * 100)
+	print "{} of the unrecorded were correctly classified, {} of the unrecorded were incorrectly classified with a success rate of {}%"\
+		  .format(non_recorded_correct, non_recorded_incorrect, float(non_recorded_correct)/float(non_recorded_correct + non_recorded_incorrect) * 100)
 	diff_time = datetime.datetime.now() - start
 	print "runtime {}".format(diff_time)
 
